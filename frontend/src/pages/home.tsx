@@ -1,19 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Upload, Image as ImageIcon, AlertCircle } from "lucide-react";
 
-export default function Home() {
-  const [selectedFiles, setSelectedFiles] = useState([]);
+interface NavigationState {
+  files: File[];
+}
+
+export default function Home(): JSX.Element {
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const navigate = useNavigate();
 
-  const handleFileChange = (event) => {
-    const files = Array.from(event.target.files);
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>): void => {
+    const files = Array.from(event.target.files || []);
     setSelectedFiles(files);
   };
 
-  const handleRemoveBackground = () => {
+  const handleRemoveBackground = (): void => {
     if (selectedFiles.length > 0) {
-      navigate("/process", { state: { files: selectedFiles } });
+      navigate("/process", { state: { files: selectedFiles } as NavigationState });
     }
   };
 

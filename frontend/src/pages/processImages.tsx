@@ -2,21 +2,38 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Download, X } from "lucide-react";
 
-export default function ProcessImages() {
+interface LocationState {
+  files: File[];
+}
+
+interface ProcessedImage {
+  original: File;
+  processed: string;
+}
+
+interface SelectedImage {
+  original: File;
+  processed: string;
+}
+
+export default function ProcessImages(): JSX.Element {
   const location = useLocation();
-  const [originalImages, setOriginalImages] = useState([]);
-  const [processedImages, setProcessedImages] = useState([]);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [error, setError] = useState(null);
+  const [originalImages, setOriginalImages] = useState<File[]>([]);
+  const [processedImages, setProcessedImages] = useState<ProcessedImage[]>([]);
+  const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(
+    null,
+  );
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (location.state && location.state.files) {
-      setOriginalImages(location.state.files);
+    const state = location.state as LocationState;
+    if (state && state.files) {
+      setOriginalImages(state.files);
     }
   }, [location]);
 
   useEffect(() => {
-    const processImages = async () => {
+    const processImages = async (): Promise<void> => {
       for (const file of originalImages) {
         const formData = new FormData();
         formData.append("image", file);
@@ -27,7 +44,7 @@ export default function ProcessImages() {
             {
               method: "POST",
               body: formData,
-              credentials: "include", // Include credentials
+              credentials: "include",
             },
           );
 
@@ -44,8 +61,10 @@ export default function ProcessImages() {
             setError(`Error processing image: ${file.name}`);
           }
         } catch (error) {
-          console.error("Error processing image:", error);
-          setError(`Error processing image: ${error.message}`);
+          const errorMessage =
+            error instanceof Error ? error.message : "Unknown error occurred";
+          console.error("Error processing image:", errorMessage);
+          setError(`Error processing image: ${errorMessage}`);
         }
       }
     };
@@ -55,15 +74,15 @@ export default function ProcessImages() {
     }
   }, [originalImages]);
 
-  const handleImageClick = (image) => {
+  const handleImageClick = (image: ProcessedImage): void => {
     setSelectedImage(image);
   };
 
-  const handleCloseModal = () => {
+  const handleCloseModal = (): void => {
     setSelectedImage(null);
   };
 
-  const handleDownloadAll = () => {
+  const handleDownloadAll = (): void => {
     processedImages.forEach((image, index) => {
       const link = document.createElement("a");
       link.href = image.processed;
@@ -162,7 +181,7 @@ export default function ProcessImages() {
             <div className="mt-4 flex justify-center">
               <a
                 href={selectedImage.processed}
-                download={`processed_image.png`}
+                download="processed_image.png"
                 className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300"
               >
                 <Download className="inline-block mr-2" />
