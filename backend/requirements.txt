@@ -4,6 +4,7 @@ certifi==2024.8.30
 charset-normalizer==3.4.0
 colorama==0.4.6
 coloredlogs==15.0.1
+Cython==3.0.11
 dj-database-url==2.3.0
 Django==5.1.2
 django-cors-headers==4.6.0
