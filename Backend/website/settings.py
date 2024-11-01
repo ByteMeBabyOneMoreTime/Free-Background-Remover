@@ -19,6 +19,7 @@ APPEND_SLASH = False
 # Application definition
 
 INSTALLED_APPS = [
+    'key',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
