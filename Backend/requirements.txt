@@ -4,6 +4,7 @@ certifi==2024.8.30
 charset-normalizer==3.4.0
 colorama==0.4.6
 coloredlogs==15.0.1
+dj-database-url==2.3.0
 Django==5.1.2
 flatbuffers==24.3.25
 humanfriendly==10.0
@@ -24,8 +25,10 @@ pillow==11.0.0
 platformdirs==4.3.6
 pooch==1.8.2
 protobuf==5.28.3
+psycopg2==2.9.10
 PyMatting==1.1.12
 pyreadline3==3.5.4
+python-dotenv==1.0.1
 referencing==0.35.1
 rembg==2.0.59
 requests==2.32.3
