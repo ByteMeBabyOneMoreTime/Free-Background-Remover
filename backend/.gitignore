@@ -1,6 +1,5 @@
 env/
 __pycache__/
 .env
-remove.c
 remove.cp310-win_amd64.pyd
 cy/

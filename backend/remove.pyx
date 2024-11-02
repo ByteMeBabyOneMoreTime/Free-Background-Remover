@@ -15,7 +15,7 @@ def rem(request, api):
         try:
             img = Image.open(image_file)
             # Remove the background
-            output_img = remove(img, model='u2netp')
+            output_img = remove(img, model='isnet-general-use')
 
             # Save the output image to a BytesIO object
             output_io = io.BytesIO()
