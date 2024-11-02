@@ -1,15 +1,20 @@
+import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Navbar from "./components/Navbar";
 import Home from "./pages/home";
-import ProcessImages from "./pages/processImages";
+import ProcessedImages from "./pages/processImages";
+import Footer from "./components/footer";
 
 export default function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen bg-black text-white flex flex-col">
+        <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/process" element={<ProcessImages />} />
+          <Route path="/processed" element={<ProcessedImages />} />
         </Routes>
+        <Footer />
       </div>
     </Router>
   );

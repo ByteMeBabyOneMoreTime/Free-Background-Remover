@@ -1,6 +1,20 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
+@font-face {
+  font-family: "Gilroy"; /* This is the name you'll use to reference the font */
+  src:
+    url("gilroy/GilroyHeavy.otf") format("opentype"),
+    url("gilroy/GilroyHeavy.ttf") format("truetype");
+  font-style: normal;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  font-family: "Gilroy", sans-serif;
+}
 
 @layer base {
   :root {
@@ -67,3 +81,4 @@
     @apply bg-background text-foreground;
   }
 }
+
