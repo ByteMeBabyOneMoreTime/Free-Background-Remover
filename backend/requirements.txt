@@ -9,6 +9,7 @@ dj-database-url==2.3.0
 Django==5.1.2
 django-cors-headers==4.6.0
 flatbuffers==24.3.25
+gunicorn==23.0.0
 humanfriendly==10.0
 idna==3.10
 imageio==2.36.0
