@@ -1,5 +1,5 @@
 from pathlib import Path
-
+import os
 from dotenv import load_dotenv
 
 # Load .env file
@@ -9,12 +9,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-5pht+z*(%lh#!k@u^39(ue97fzz&2reme%*^ep$+nq6byta%8p"
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 APPEND_SLASH = False
 # Application definition
@@ -65,7 +65,7 @@ WSGI_APPLICATION = "website.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-import os
+
 
 import dj_database_url
 
