@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ZoomIn, ZoomOut, X } from "lucide-react";
+import { X, Eye } from "lucide-react";
 
 interface ProcessedImage {
   id: string;
@@ -15,43 +15,42 @@ interface ImageModalProps {
 }
 
 export default function ImageModal({ image, onClose }: ImageModalProps) {
-  const [zoom, setZoom] = useState(100);
-  const [comparing, setComparing] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [isComparing, setIsComparing] = useState(false);
+  const [compareProgress, setCompareProgress] = useState(0);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
 
-  const handleZoomIn = useCallback(
-    () => setZoom((prev) => Math.min(prev + 10, 200)),
-    [],
-  );
-  const handleZoomOut = useCallback(
-    () => setZoom((prev) => Math.max(prev - 10, 50)),
-    [],
-  );
-
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    setIsDragging(true);
-    setDragStart({ x: e.clientX, y: e.clientY });
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setMousePosition({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      });
+    }
   }, []);
 
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent) => {
-      if (isDragging) {
-        setDragOffset({
-          x: dragOffset.x + e.clientX - dragStart.x,
-          y: dragOffset.y + e.clientY - dragStart.y,
-        });
-        setDragStart({ x: e.clientX, y: e.clientY });
+  const handleCompareStart = () => setIsComparing(true);
+  const handleCompareEnd = () => setIsComparing(false);
+
+  useEffect(() => {
+    let animationFrame: number;
+
+    const animateComparison = () => {
+      if (isComparing && compareProgress < 100) {
+        setCompareProgress((prev) => Math.min(prev + 2, 100));
+      } else if (!isComparing && compareProgress > 0) {
+        setCompareProgress((prev) => Math.max(prev - 2, 0));
       }
-    },
-    [isDragging, dragOffset, dragStart],
-  );
 
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-  }, []);
+      animationFrame = requestAnimationFrame(animateComparison);
+    };
+
+    animationFrame = requestAnimationFrame(animateComparison);
+
+    return () => cancelAnimationFrame(animationFrame);
+  }, [isComparing, compareProgress]);
 
   return (
     <AnimatePresence>
@@ -59,68 +58,72 @@ export default function ImageModal({ image, onClose }: ImageModalProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+        className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50"
         onClick={onClose}
       >
         <div
-          className="bg-gray-800 p-4 rounded-lg max-w-4xl w-full mx-4 relative"
+          className="bg-gray-900 p-4 rounded-lg max-w-4xl w-full mx-4 relative"
           onClick={(e) => e.stopPropagation()}
         >
           <button
             onClick={onClose}
             className="absolute top-2 right-2 text-white hover:text-green-500 transition-colors"
+            aria-label="Close modal"
           >
             <X className="w-6 h-6" />
           </button>
           <div
             ref={containerRef}
-            className="relative overflow-hidden h-[60vh]"
-            onMouseDown={handleMouseDown}
+            className="relative overflow-hidden h-[60vh] rounded-lg"
             onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
           >
-            <motion.img
-              src={
-                comparing
-                  ? URL.createObjectURL(image.original)
-                  : image.processed
-              }
-              alt={`Image ${image.id}`}
+            <img
+              ref={imageRef}
+              src={image.processed}
+              alt={`Processed Image ${image.id}`}
+              className="w-full h-full object-contain"
+            />
+            <motion.div
+              className="absolute inset-y-0 left-0 bg-gray-900"
+              initial={{ width: 0 }}
+              animate={{ width: `${compareProgress}%` }}
+              transition={{ type: "tween", ease: "easeInOut", duration: 0.3 }}
+            >
+              <img
+                src={URL.createObjectURL(image.original)}
+                alt={`Original Image ${image.id}`}
+                className="w-full h-full object-contain"
+              />
+            </motion.div>
+            <div
+              className="absolute w-20 h-20 border-2 border-green-500 rounded-full pointer-events-none"
               style={{
-                width: `${zoom}%`,
-                x: dragOffset.x,
-                y: dragOffset.y,
-                cursor: isDragging ? "grabbing" : "grab",
+                left: mousePosition.x - 40,
+                top: mousePosition.y - 40,
+                display: isComparing ? "none" : "block",
               }}
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-              drag={zoom > 100}
-              dragConstraints={containerRef}
-              dragElastic={0}
-            />
+            >
+              <div className="absolute inset-0 bg-gray-900 bg-opacity-50 rounded-full" />
+              <div
+                className="absolute inset-0 bg-no-repeat bg-cover rounded-full"
+                style={{
+                  backgroundImage: `url(${image.processed})`,
+                  backgroundPosition: `${-mousePosition.x + 40}px ${-mousePosition.y + 40}px`,
+                  transform: "scale(2)",
+                }}
+              />
+            </div>
           </div>
-          <div className="mt-4 flex justify-center items-center space-x-4">
+          <div className="mt-4 flex justify-center">
             <button
-              onClick={handleZoomOut}
-              className="p-2 bg-green-500 text-black rounded-full hover:bg-green-600 transition-colors"
+              onMouseDown={handleCompareStart}
+              onMouseUp={handleCompareEnd}
+              onMouseLeave={handleCompareEnd}
+              className="p-2 bg-green-500 text-black rounded-full hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+              aria-label="Compare original and processed images"
             >
-              <ZoomOut className="w-4 h-4" />
+              <Eye className="w-6 h-6" />
             </button>
-            <span className="text-white">{zoom}%</span>
-            <button
-              onClick={handleZoomIn}
-              className="p-2 bg-green-500 text-black rounded-full hover:bg-green-600 transition-colors"
-            >
-              <ZoomIn className="w-4 h-4" />
-            </button>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={comparing ? 100 : 0}
-              onChange={(e) => setComparing(Number(e.target.value) > 50)}
-              className="w-48"
-            />
           </div>
         </div>
       </motion.div>
